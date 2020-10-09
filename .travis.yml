@@ -1,0 +1,45 @@
+os: linux
+language: generic
+dist: focal
+addons:
+  apt:
+    sources:
+      - sourceline: 'deb https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable'
+    packages:
+    - docker-ce
+env: 
+  matrix:
+    VERSION=20.0.0 VERSION_MAJOR=19 LATEST=true
+    VERSION=19.0.3 VERSION_MAJOR=19 LATEST=true
+    VERSION=18.0.9 ERSION_MAJOR=19 LATEST=true
+
+script:
+- docker --version
+- echo '{"experimental":true}' | sudo tee /etc/docker/daemon.json
+- sudo systemctl restart docker
+- export DOCKER_CLI_EXPERIMENTAL=enabled
+- docker run --rm --privileged docker/binfmt:a7996909642ee92942dcd6cff44b9b95f08dad64
+- docker --version
+- docker buildx create --name builder --use
+- docker buildx ls
+- docker-compose --version
+- echo "$DOCKER_HUB_P" | docker login --username "$DOCKER_HUB_U" --password-stdin
+- bash build_and_push.sh
+- docker container ls
+- sudo apt-get install -y python3-setuptools python3-pip
+- pip3 install --user anchorecli
+- export PATH="$HOME/.local/bin/:$PATH"
+- anchore-cli image add docker.io/tob123/nextcloud-base-staging:${VERSION}
+- anchore-cli image wait docker.io/tob123/nextcloud-base-staging:${VERSION}
+- anchore-cli evaluate check docker.io/tob123/nextcloud-base-staging:${VERSION}
+- echo '{"experimental":true}' | sudo tee /etc/docker/daemon.json
+- export DOCKER_CLI_EXPERIMENTAL=enabled
+- docker run --rm --privileged docker/binfmt:a7996909642ee92942dcd6cff44b9b95f08dad64
+# Upgrade to Docker CE 19.03 for BuildKit support
+- curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+- sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+- echo "$DOCKER_HUB_P" | docker login --username "$DOCKER_HUB_U" --password-stdin
+- bash dockcompare.sh
+
+
+
