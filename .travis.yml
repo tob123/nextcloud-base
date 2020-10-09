@@ -9,9 +9,9 @@ addons:
     - docker-ce
 env: 
   matrix:
-    VERSION=20.0.0 VERSION_MAJOR=19 LATEST=true
-    VERSION=19.0.3 VERSION_MAJOR=19 LATEST=true
-    VERSION=18.0.9 ERSION_MAJOR=19 LATEST=true
+    VERSION=20.0.0 VERSION_MAJOR=20 LATEST=true
+    VERSION=19.0.3 VERSION_MAJOR=19
+    VERSION=18.0.9 VERSION_MAJOR=18
 
 script:
 - docker --version
